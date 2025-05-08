@@ -1,0 +1,806 @@
+<mvc:View
+    controllerName="com.sharp.acntsummary.controller.accountSummaryMainView"
+    xmlns:mvc="sap.ui.core.mvc"
+    displayBlock="true"
+    xmlns:m="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.ui.table"
+    xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+    xmlns:fb="sap.ui.comp.filterbar"
+    xmlns:l="sap.ui.layout"
+>
+    <m:Page
+        id="page"
+        title="Account Summmary"
+        showHeader="false"
+    >
+        <m:content>
+            
+            <m:Bar
+                id="dealerinfo"
+                visible="false"
+            >
+                <m:contentRight>
+                    <m:Label
+                        text="Dealer #"
+                        class="sapUiTinyMarginTop sapUiTinyMarginEnd"
+                    />
+                    <m:Text
+                        id="dealerid"
+                        class="sapUiTinyMarginTop sapUiMediumMarginEnd sapThemeDarkText"
+                    />
+                    <m:Label
+                        text="Name"
+                        class="sapUiTinyMarginTop sapUiTinyMarginEnd"
+                    />
+                    <m:Text
+                        id="dealername"
+                        class="sapUiTinyMarginTop sapUiMediumMarginEnd sapThemeDarkText"
+                    />
+                </m:contentRight>
+            </m:Bar>
+            
+            <m:Panel class="sapUiResponsiveContentPadding">
+                <!-- <m:headerToolbar>
+			<m:Toolbar height="3rem">
+				
+				<ToolbarSpacer />
+				<Button icon="sap-icon://settings" />
+				<Button icon="sap-icon://drop-down-list" />
+			</m:Toolbar>
+		</m:headerToolbar> -->
+
+                <m:content>
+                    <m:HBox>
+                        <m:RadioButtonGroup
+                            id="rbg1"
+                            columns="2"
+                            width="100%"
+                            selectedIndex="0"
+                            select="radioSelected"
+                            class="sapUiLargeMarginEnd"
+                        >
+                            <m:RadioButton
+                                id="openOnly"
+                                text="Open Invoices Only"
+                            />
+                            <m:RadioButton
+                                id="incCleared"
+                                text="Include Invoices Cleared"
+                            />
+                        </m:RadioButtonGroup>
+
+                        <m:RadioButtonGroup
+                            id="rbg2"
+                            columns="2"
+                            width="100%"
+                            selectedIndex="0"
+                            visible="false"
+                            select="radioSelected1"
+                            class="sapUiLargeMarginEnd"
+                        >
+                            <!-- <m:RadioButton id="recently" text="Recently" selected="true"/> -->
+                            <m:RadioButton
+                                id="frmTo"
+                                text="From-To"
+                                selected="true"
+                            />
+                        </m:RadioButtonGroup>
+
+                        <m:HBox
+                            id="DatesBox"
+                            visible="{oLocalModel>/DatesVis}"
+                        >
+                            <m:Label
+                                text="From"
+                                labelFor="idInspectionDateFrom"
+                                class="sapUiTinyMarginEnd sapUiTinyMarginTop zsapMLabel"
+                            />
+                            <m:DatePicker
+                                id="idInspectionDateFrom"
+                                required="true"
+                                class="sapUiSmallMarginEnd"
+                                width="150px"
+                                placeholder="From Date"
+                                value="{oLocalModel>/FromDate}"
+                                valueFormat="yyyyMMdd"
+                                tooltip="Open Date Picker"
+                            />
+
+                            <m:Label
+                                text="To"
+                                labelFor="idInspectionDateTo"
+                                class="sapUiTinyMarginEnd sapUiTinyMarginTop zsapMLabel"
+                            />
+                            <m:DatePicker
+                                id="idInspectionDateTo"
+                                required="true"
+                                class="sapUiSmallMarginEnd"
+                                width="150px"
+                                placeholder="To Date"
+                                value="{oLocalModel>/ToDate}"
+                                valueFormat="yyyyMMdd"
+                                tooltip="Open Date Picker"
+                            />
+                        </m:HBox>
+                    </m:HBox>
+                </m:content>
+            </m:Panel>
+
+            <m:OverflowToolbar
+                id="toolbar1"
+                class="sapUiResponsiveContentPadding sapUiMediumMarginBegin"
+            >
+                <m:Label
+                    id="idLblCompCode"
+                    text="Company Code"
+                    labelFor="compcode"
+                    class="zsapMLabel"
+                />
+                <m:Select
+                    xmlns="sap.m"
+                    id="idSelCompCode"
+                    visible="true"
+                    width="100px"
+                    required="true"
+                    class="custMarginMedium"
+                    change="onSelectCompanycode"
+                >
+                    <core:Item
+                        key="2010"
+                        text="2010"
+                    />
+                    <core:Item
+                        key="2050"
+                        text="2050"
+                    />
+                </m:Select>
+                <m:Label
+                    id="CustNum"
+                    text="Customer #:"
+                    labelFor="CustNumInp"
+                    class="zsapMLabel"
+                />
+                <m:Input
+                    id="CustNumInp"
+                    required="true"
+                    value="{oLocalModel>/CustNum}"
+                    class="sapUiSmallMarginEnd zsapMInputBaseContentWrapper"
+                    width="100px"
+                    submit="onSearchBtn"
+                />
+
+                <m:Select
+                    id="CustDrp"
+                    selectedKey="{oLocalModel>/CustNum}"
+                    visible="false"
+                    items="{oLocalModel>/Customers}"
+                    showSecondaryValues="false"
+                    width="21rem"
+                    class="custMarginMedium"
+                    change="onSelect"
+                >
+                    <core:ListItem
+                        key="{oLocalModel>Customerno}"
+                        text="{oLocalModel>Name}"
+                        additionalText="{oLocalModel>Name}"
+                    />
+                </m:Select>
+
+                <m:Button
+                    text="Search"
+                    press="onSearchBtn"
+                    ariaDescribedBy="acceptButtonDescription genericButtonDescription"
+                    class="sapUiSmallMarginEnd"
+                />
+            </m:OverflowToolbar>
+
+            <m:Table
+                id="accountSummaryTabMob"
+                inset="false"
+                alternateRowColors="true"
+                autoPopinMode="true"
+                popinLayout="GridSmall"
+                class="sapUiSmallMarginBegin"
+                noDataText="No records to display"
+                items="{path: 'openItems>/'}"
+                app:tabname="accountSummaryTable"              
+                
+            >
+                <m:headerToolbar>
+                    <m:OverflowToolbar
+                        style="Clear"
+                        height="3rem"
+                    >
+                        <m:Text
+                            id="address1"
+                            text="{oLocalModel>/Address}"
+                        />
+
+                        <m:ToolbarSpacer />
+
+                        <m:SearchField
+                            placeholder="Filter"
+                            value="{oLocalModel>/globalFilter}"
+                            search="onFilter"
+                            width="10rem"
+                            app:tabname="accountSummaryTabMob"
+                        />
+
+                        <m:Image
+                            press="onDataExport"
+                            src="/sap/bc/ui5_ui5/sap/zsharpcss/icons/icon_export_excel.png"
+                            tooltip="Export Report to Excel M"
+                                               />
+
+                        <m:Image
+                            press="exportToPDF"
+                            src="/sap/bc/ui5_ui5/sap/zsharpcss/icons/icon_export_pdf.png"
+                            tooltip="Export Report to PDF"
+                        />
+
+                        <m:Image
+                            src="/sap/bc/ui5_ui5/sap/zsharpcss/icons/icon_refresh.png"
+                            tooltip="Reset Table"
+                            press="resetTable"
+                        />
+                    </m:OverflowToolbar>
+                </m:headerToolbar>
+
+                <m:columns>
+                    <m:Column importance="High">
+                        <m:Label
+                            text="Doc # M"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column importance="High">
+                        <m:Label
+                            text="Doc. Type M"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column importance="High">
+                        <m:Label
+                            text="Order #"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column importance="Low">
+                        <m:Label
+                            text="Ref #"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column importance="Low">
+                        <m:Label
+                            text="Assignment #"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column importance="Medium">
+                        <m:Label
+                            text="Doc. Date"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column importance="Medium">
+                        <m:Label
+                            text="Due Date"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column
+                        visible="true"
+                        importance="Low"
+                    >
+                        <m:Label
+                            text="Status"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column
+                        width="14rem"
+                        importance="Low"
+                    >
+                        <m:Label
+                            text="Terms"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column
+                        hAlign="Right"
+                        importance="High"
+                    >
+                        <m:Label
+                            text="Amount 22"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column
+                        width="52px"
+                        importance="High"
+                    >
+                        <m:Label
+                            text="Curr"
+                            design="Bold"
+                        />
+                    </m:Column>
+
+                    <m:Column importance="High">
+                        <m:Label
+                            text="View PDF"
+                            design="Bold"
+                        />
+                    </m:Column>
+                </m:columns>
+                <m:items>
+                    <m:ColumnListItem vAlign="Middle">
+                        <m:cells>
+                            <m:Text
+                                text="{openItems>Type}"
+                                visible="false"
+                            />
+                            <m:Text
+                                text="{openItems>Wrbtr}"
+                                visible="false"
+                            />
+
+                            <m:Text
+                                text="{ path:'openItems>Belnr', formatter: 'com.sharp.acntsummary.prototype.removeLeading' }"
+                                wrapping="false"
+                            />
+
+                            <m:Text
+                                text="{ path:'openItems>Ltext',
+								formatter: 'com.sharp.acntsummary.prototype.removeLeading'}"
+                            />
+
+                            <m:Text
+                                text="{
+						path: 'openItems>Salesorder',
+						formatter: 'com.sharp.acntsummary.prototype.removeLeading'}"
+                                wrapping="false"
+                            />
+
+                            <m:Text
+                                text="{ path:'openItems>Xblnr',
+								formatter: 'com.sharp.acntsummary.prototype.removeLeading'}"
+                                wrapping="false"
+                            />
+
+                            <m:Text
+                                text="{ path:'openItems>Zuonr',
+								formatter: 'com.sharp.acntsummary.prototype.removeLeading'}"
+                                wrapping="false"
+                            />
+
+                            <m:Text
+                                text="{ path: 'openItems>Zfbdt', formatter: '.dateFormat'}"
+                                wrapping="false"
+                            />
+
+                            <m:Text
+                                text="{path: 'openItems>Zaldt', formatter: '.dateFormat'}"
+                                wrapping="false"
+                            />
+
+                            <m:Text
+                                text="{ path: 'openItems>Type', formatter: '.statusFormat'}"
+                                wrapping="false"
+                            />
+
+                            <m:Label
+                                text="{ path:'openItems>ZtermText', formatter: 'com.sharp.acntsummary.prototype.removeLeading'}"
+                            />
+
+                            <m:Text
+                                text="{path:'openItems>Wrbtr',formatter:'.currFormatC'}"
+                            />
+
+                            <m:Text
+                                text="{oLocalModel>/Currency}"
+                                wrapping="false"
+                            />
+                            <m:Link
+                                text="{openItems>KschlText}"
+                                wrapping="false"
+                                href="/sap/opu/odata/sap/ZSD_ACCOUNT_SUMMARY_SRV/pdfSet(ConditionType='{openItems>Kschl}',DocumentNumber='{openItems>Belnr}',DocumentType='{openItems>Vbtyp}')/$value"
+                                target="_blank"
+                            />
+                        </m:cells>
+                    </m:ColumnListItem>
+                </m:items>
+            </m:Table>
+            <m:Bar id="totalsBarMob">
+                <m:contentLeft>
+                    <m:HBox
+                        visible="{oLocalModel>/TotOpenVis}"
+                        class="sapUiSmallMarginEnd"
+                    >
+                        <m:Text text="Total Open: " />
+                        <m:ToolbarSpacer width="7px" />
+                        <m:ObjectNumber
+                            number="{oLocalModel>/TotalOpen}"
+                            state="Warning"
+                            textAlign="Right"
+                        />
+                    </m:HBox>
+                    <!--
+                    <m:HBox
+                        visible="{oLocalModel>/TotClearVis}"
+                        class="sapUiSmallMarginEnd"
+                    >
+                        <m:Text
+                            text="Total Cleared: "
+                            class="sapUiTinyMarginEnd"
+                        />
+                        <m:ToolbarSpacer width="7px" />
+                        <m:ObjectNumber
+                            number="{oLocalModel>/TotalCleared}"
+                            state="Success"
+                            textAlign="Right"
+                        />
+                    </m:HBox>
+                    -->
+                </m:contentLeft>
+            </m:Bar>
+
+            <Table
+                id="accountSummaryTable"
+                rows="{openItems>/}"
+                visibleRowCount="{oLocalModel>/Size}"
+                width="98%"
+                class="sapUiSmallMarginBegin"
+                selectionMode="None"
+                filter="filterStd"
+                app:tabname="accountSummaryTable"                
+            >
+                <rowMode>
+                </rowMode>
+                <extension>
+                    <m:Bar>
+                        <m:contentLeft>
+                            <m:Text
+                                id="address"
+                                text="{oLocalModel>/Address}"
+                            />
+                        </m:contentLeft>
+                        <m:contentRight>
+                            <m:SearchField
+                                placeholder="Filter"
+                                value="{oLocalModel>/globalFilter}"
+                                search="onFilter"
+                                width="10rem"
+                                app:tabname="accountSummaryTable"
+                            />
+                            <!--
+                              <m:Button
+                                text="Excel Export POC"
+                                press="onExcelExportPOC"
+                                ariaDescribedBy="acceptButtonDescription genericButtonDescription"
+                                class="sapUiSmallMarginEnd"
+                            />
+                            -->
+                            <m:Image
+                                press="onExcelExport"
+                                src="/sap/bc/ui5_ui5/sap/zsharpcss/icons/icon_export_excel.png"
+                                tooltip="Export Report to Excel"
+                            />
+
+                            <m:Image
+                                press="exportToPDF"
+                                src="/sap/bc/ui5_ui5/sap/zsharpcss/icons/icon_export_pdf.png"
+                                 tooltip="Export Report to PDF"
+                            />
+
+                            <!-- <m:Image							
+							src="/sap/bc/ui5_ui5/sap/zsharpcss/icons/icon_refresh.png"
+							tooltip="Reset Table"
+							press="resetTable"/> -->
+                        </m:contentRight>
+                    </m:Bar>
+                </extension>
+                <footer>
+                    <m:Bar id="tableFooter">
+                        <m:contentLeft>
+                            <m:HBox
+                                visible="{oLocalModel>/TotOpenVis}"
+                                class="sapUiSmallMarginEnd"
+                            >
+                                <m:Text text="Total Open: " />
+                                <m:ToolbarSpacer width="7px" />
+                                <m:ObjectNumber
+                                    number="{oLocalModel>/TotalOpen}"
+                                    state="Warning"
+                                    textAlign="Right"
+                                />
+                            </m:HBox>
+                            <!--
+                            <m:HBox
+                                visible="{oLocalModel>/TotClearVis}"
+                                class="sapUiSmallMarginEnd"
+                            >
+                                <m:Text
+                                    text="Total Cleared: "
+                                    class="sapUiTinyMarginEnd"
+                                />
+                                <m:ToolbarSpacer width="7px" />
+                                <m:ObjectNumber
+                                    number="{oLocalModel>/TotalCleared}"
+                                    state="Success"
+                                    textAlign="Right"
+                                />
+                            </m:HBox>
+                            -->
+                        </m:contentLeft>
+                    </m:Bar>
+                </footer>
+                <columns>
+                    <Column
+                        hAlign="Right"
+                        visible="false"
+                    >
+                        <m:Label text="Type" />
+                        <template>
+                            <m:Text text="{openItems>Type}" />
+                        </template>
+                    </Column>
+                    <Column
+                        hAlign="Right"
+                        visible="false"
+                    >
+                        <m:Label text="Amount 33" />
+                        <template>
+                            <m:Text text="{openItems>Wrbtr}" />
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="Doc"
+                        sortProperty="Belnr"
+                        autoResizable="true"
+                        filterProperty="Belnr"
+                        width="95px"
+                    >
+                        <m:Label
+                            text="Doc # "
+                            design="Bold"
+                        />
+                        <template>
+                            <m:Text
+                                text="{ path:'openItems>Belnr',
+								formatter: 'com.sharp.acntsummary.prototype.removeLeading'}"
+                                wrapping="true"
+                            />
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="DocType"
+                        sortProperty="Ltext"
+                        autoResizable="true"
+                        filterProperty="Ltext"
+                        width="145px"
+                    >
+                        <m:Label
+                            text="Doc. Type"
+                            design="Bold"
+                        />
+                        <template>
+                            <m:Text
+                                text="{ path:'openItems>Ltext',
+								formatter: 'com.sharp.acntsummary.prototype.removeLeading'}"
+                            />
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="Salesorder"
+                        sortProperty="Salesorder"
+                        autoResizable="true"
+                        filterProperty="Salesorder"
+                          width="85px"
+                    >
+                        <m:Label
+                            text="Order #"
+                            design="Bold"
+                        />
+                        <template>
+                            <m:Text
+                                text="{
+						path: 'openItems>Salesorder',
+						formatter: 'com.sharp.acntsummary.prototype.removeLeading'
+					}"
+                                wrapping="false"
+                            />
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="Ref"
+                        sortProperty="Xblnr"
+                        width="8rem"
+                        filterProperty="Xblnr"
+                    >
+                        <m:Label
+                            text="Ref #                             "
+                            design="Bold"
+                        />
+                        <template>
+                            <m:Text
+                                text="{ path:'openItems>Xblnr',
+								formatter: 'com.sharp.acntsummary.prototype.removeLeading'}"
+                                wrapping="false"
+                            />
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="Assignment"
+                        sortProperty="Zuonr"
+                        autoResizable="true"
+                        filterProperty="Zuonr"
+                          width="95px"
+                    >
+                        <m:Label
+                            text="Assignment #"
+                            design="Bold"
+                        />
+                        <template>
+                            <m:Text
+                                text="{ path:'openItems>Zuonr',
+								formatter: 'com.sharp.acntsummary.prototype.removeLeading'}"
+                                wrapping="false"
+                            />
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="CreatedBy"
+                        sortProperty="Zfbdt"
+                        autoResizable="true"
+                        filterProperty="Zfbdt"
+                        width="95px"
+                    >
+                        <m:Label
+                            text="Doc. Date"
+                            design="Bold"
+                        />
+                        <template>
+                            <m:Text
+                                text="{ path: 'openItems>Zfbdt', formatter: '.dateFormat' }"
+                                wrapping="true"
+                            />
+                        </template>
+                    </Column>
+                    <Column
+                        id="DueDt" 
+                        sortProperty="Zaldt"
+                        autoResizable="true"
+                        filterProperty="Zaldt"
+                         width="90px"
+                    >
+                        <m:Label
+                            text="Due Date"
+                            design="Bold"
+                        />
+                        <template>
+                          <!-- <m:Text  text="{openItems>Zaldt}" wrapping="false"  />    -->                          
+                            <m:Text  text="{ path: 'openItems>Zaldt', 
+					                	formatter: '.dateFormat'  }"
+                                wrapping="true"
+                            />
+                           
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="Status"
+                        visible="true"
+                        autoResizable="true"
+                        filterProperty="Type"
+                        sortProperty="Type"
+                        width="70px"
+                    >
+                        <m:Label
+                            text="Status"
+                            design="Bold"
+                        />
+                        <template>
+                            <m:Text
+                                text="{
+						path: 'openItems>Type',
+						formatter: '.statusFormat'
+					}"
+                                wrapping="false"
+                            />
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="TermText"
+                        width="9rem"
+                        filterProperty="ZtermText"
+                        sortProperty="ZtermText"
+                    >
+                        <m:Label
+                            text="Terms"
+                            design="Bold"
+                        />
+                        <template>
+                            <m:Label
+                                text="{ path:'openItems>ZtermText',
+								formatter: 'com.sharp.acntsummary.prototype.removeLeading'}"
+                            />
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="OpenAmnt"
+                        hAlign="Right"
+                        autoResizable="true"
+                        sortProperty="Wrbtr"
+                        filterProperty="Wrbtr"
+                        filterType="sap.ui.model.type.Float"
+                         width="95px"
+                    >
+                        <m:Label
+                            text="Amount"
+                            design="Bold"
+                        />
+                        <template>
+                            <!-- <m:Text text="{openItems>Wrbtr}" />  -->
+                             <m:Text text="{path:'openItems>Wrbtr',formatter:'.currFormatC'}"/>  
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="CurrencyUnit"
+                        width="52px"
+                    >
+                        <m:Label
+                            text="Curr"
+                            design="Bold"
+                        />
+                        <template>
+                            <m:Text
+                                text="{oLocalModel>/Currency}"
+                                wrapping="false"
+                            />
+                        </template>
+                    </Column>
+
+                    <Column
+                        id="ViewPDF"
+                        autoResizable="true"
+                        sortProperty="FormFound"
+                    >
+                        <m:Label
+                            text="View PDF"
+                            design="Bold"
+                        />
+                        <template>
+                            <m:Link
+                                text="{openItems>KschlText}"
+                                wrapping="false"
+                                href="/sap/opu/odata/sap/ZSD_ACCOUNT_SUMMARY_SRV/pdfSet(ConditionType='{openItems>Kschl}',DocumentNumber='{openItems>Belnr}',DocumentType='{openItems>Vbtyp}')/$value"
+                                target="_blank"
+                            />
+                        </template>
+                    </Column>
+                </columns>
+            </Table>
+        </m:content>
+    </m:Page>
+</mvc:View>
